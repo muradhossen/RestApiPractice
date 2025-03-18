@@ -31,12 +31,13 @@ builder.Services.AddAuthentication(x =>
 
 builder.Services.AddAuthorization(x =>
 {
-    x.AddPolicy(AuthConstants.AdminUserPolicyName, p => p.RequireClaim(AuthConstants.AdminClaimName,"true"));
-
-    x.AddPolicy(AuthConstants.TrustedMemberPolicyName, p=> p.RequireAssertion(
-        c => c.User.HasClaim(m => m is { Type : AuthConstants.AdminClaimName, Value : "true"}) || 
-        c.User.HasClaim(m => m is { Type : AuthConstants.TrustedMemberClaimName, Value : "true"})));
-
+    x.AddPolicy(AuthConstants.AdminUserPolicyName, 
+        p => p.RequireClaim(AuthConstants.AdminClaimName, "true"));
+    
+    x.AddPolicy(AuthConstants.TrustedMemberPolicyName,
+        p => p.RequireAssertion(c => 
+            c.User.HasClaim(m => m is { Type: AuthConstants.AdminClaimName, Value: "true" }) || 
+            c.User.HasClaim(m => m is { Type: AuthConstants.TrustedMemberClaimName, Value: "true" })));
 });
 
 builder.Services.AddControllers(); 
