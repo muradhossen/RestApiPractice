@@ -41,11 +41,14 @@ namespace Movies.Api.Mapping
             };
         }
 
-        public static MoviesResponse ToReponse(this IEnumerable<Movie> movies)
+        public static MoviesResponse ToResponse(this IEnumerable<Movie> movies, int Page, int PageSize, int movieCount)
         {
             return new MoviesResponse
             {
-                Items = movies.Select(c => c.ToReponse())
+                Items = movies.Select(c => c.ToReponse()),
+                Page = Page,
+                PageSize = PageSize,
+                Total = movieCount
             };
         }
         public static IEnumerable<MovieRatingResponse> MapToResponse(this IEnumerable<MovieRating> ratings)
@@ -56,6 +59,27 @@ namespace Movies.Api.Mapping
                 Slug = x.Slug,
                 MovieId = x.MovieId
             });
+        }
+
+        public static GetAllMoviesOptions MapToOptions(this GetAllMoviesRequest request)
+        {
+            return new GetAllMoviesOptions
+            {
+                Title = request.Title,
+                YearOfRelease = request.Year,
+                SortField = request.SortBy?.Trim('+', '-'),
+                SortOrder = request.SortBy is null ? SortOrder.Unsorted :
+                request.SortBy.StartsWith('-') ? SortOrder.Descending : SortOrder.Ascending,
+                Page = request.Page,
+                PageSize = request.PageSize
+            };
+        }
+
+        public static GetAllMoviesOptions WithUser(this GetAllMoviesOptions options,
+            Guid? userId)
+        {
+            options.UserId = userId;
+            return options;
         }
     }
 }
