@@ -70,6 +70,8 @@ builder.Services.AddApplication()
 builder.Services.AddHealthChecks()
     .AddCheck<DatabaseHealthCheck>("Database");
 
+builder.Services.AddResponseCaching();
+
 var app = builder.Build();
  
 if (app.Environment.IsDevelopment())
@@ -91,6 +93,8 @@ app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.UseResponseCaching();
 
 app.UseMiddleware<ValidationMappingMiddleware>();
 

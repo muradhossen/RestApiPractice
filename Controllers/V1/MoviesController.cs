@@ -39,6 +39,7 @@ namespace Movies.Api.Controllers.V1
         [HttpGet(ApiEndpoints.Default.Movies.Get)]
         [ProducesResponseType(typeof(MovieResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ResponseCache(Duration = 60, Location = ResponseCacheLocation.Any,VaryByHeader = "Accept,Accept-Encoding")]
         public async Task<IActionResult> Get([FromRoute] string idOrSlug
             , LinkGenerator linkGenerator, CancellationToken token)
         {
