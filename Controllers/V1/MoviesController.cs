@@ -12,6 +12,7 @@ namespace Movies.Api.Controllers.V1
     [Authorize]
     [ApiController]
     [ApiVersion(1.0)]
+    [ApiVersion(2.0)]
     public class MoviesController : ControllerBase
     {
         private readonly IMovieService _movieService;
@@ -31,7 +32,7 @@ namespace Movies.Api.Controllers.V1
             return CreatedAtAction(nameof(Get), new { idOrSlug = movie.Id }, movie);
         }
 
-         
+        [MapToApiVersion(1.0)]
         [HttpGet(ApiEndpoints.Default.Movies.Get)]
         public async Task<IActionResult> Get([FromRoute] string idOrSlug
             , LinkGenerator linkGenerator, CancellationToken token)
@@ -74,7 +75,51 @@ namespace Movies.Api.Controllers.V1
             return Ok(response);
         }
 
-  
+
+        [MapToApiVersion(2.0)]
+        [HttpGet(ApiEndpoints.Default.Movies.Get)]
+        public async Task<IActionResult> GetV2([FromRoute] string idOrSlug
+            , LinkGenerator linkGenerator, CancellationToken token)
+        {
+            var userId = HttpContext.GetUserId();
+
+            var movie = Guid.TryParse(idOrSlug, out var id)
+                ? await _movieService.GetMovieByIdAsync(id, userId, token)
+                : await _movieService.GetMovieBySlugAsync(idOrSlug, userId, token);
+
+            if (movie is null)
+            {
+                return NotFound();
+            }
+
+            var response = movie.ToReponse();
+
+            response.Links.Add(new Link
+            {
+                Href = linkGenerator.GetPathByAction(HttpContext, nameof(Get), values: new { idOrSlug = movie.Id }),
+                Rel = "Salf",
+                Type = "GET"
+            });
+
+            response.Links.Add(new Link
+            {
+                Href = linkGenerator.GetPathByAction(HttpContext, nameof(Update), values: new { id = movie.Id }),
+                Rel = "Salf",
+                Type = "PUT"
+            });
+
+            response.Links.Add(new Link
+            {
+                Href = linkGenerator.GetPathByAction(HttpContext, nameof(Delete), values: new { id = movie.Id }),
+                Rel = "Salf",
+                Type = "DELETE"
+            });
+
+
+            return Ok(response);
+        }
+
+
         [HttpGet(ApiEndpoints.Default.Movies.GetAll)]
         public async Task<IActionResult> GetAll([FromQuery] GetAllMoviesRequest request, CancellationToken token)
         {

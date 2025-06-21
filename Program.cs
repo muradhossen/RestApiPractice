@@ -1,9 +1,13 @@
+using Asp.Versioning;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Movies.Api.Auth;
 using Movies.Api.Mapping;
+using Movies.Api.Swagger;
 using Movies.Application;
 using Movies.Application.Database;
+using Swashbuckle.AspNetCore.SwaggerGen;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -40,9 +44,7 @@ builder.Services.AddAuthorization(x =>
             c.User.HasClaim(m => m is { Type: AuthConstants.TrustedMemberClaimName, Value: "true" })));
 });
 
-builder.Services.AddControllers(); 
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+
 
 #region Api versioning
 
@@ -51,9 +53,17 @@ builder.Services.AddApiVersioning(options =>
     options.DefaultApiVersion = new Asp.Versioning.ApiVersion(1.0);
     options.AssumeDefaultVersionWhenUnspecified = true;
     options.ReportApiVersions = true;
-}).AddMvc();  
+    options.ApiVersionReader = new MediaTypeApiVersionReader("api-version");
+}).AddMvc().AddApiExplorer();
 
 #endregion
+
+builder.Services.AddControllers();
+
+builder.Services.AddTransient<IConfigureOptions<SwaggerGenOptions>, ConfigureSwaggerOption>();
+
+
+builder.Services.AddSwaggerGen(x => x.OperationFilter<SwaggerDefaultValues>());
 
 builder.Services.AddApplication()
     .AddDatabase(confg["Database:ConnectionString"]);
@@ -63,7 +73,14 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(x =>
+    {
+        foreach (var description in app.DescribeApiVersions())
+        {
+            x.SwaggerEndpoint($"/swagger/{description.GroupName}/swagger.json",
+                description.GroupName);
+        }
+    });
 }
 
 app.UseHttpsRedirection();
