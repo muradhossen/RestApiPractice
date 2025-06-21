@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Asp.Versioning;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Movies.Api.Auth;
 using Movies.Api.Mapping;
@@ -10,6 +11,7 @@ namespace Movies.Api.Controllers.V1
 {
     [Authorize]
     [ApiController]
+    [ApiVersion(1.0)]
     public class MoviesController : ControllerBase
     {
         private readonly IMovieService _movieService;
@@ -20,7 +22,7 @@ namespace Movies.Api.Controllers.V1
         }
 
         [Authorize(AuthConstants.TrustedMemberPolicyName)]
-        [HttpPost(ApiEndpoints.V1.Movies.Create)]
+        [HttpPost(ApiEndpoints.Default.Movies.Create)]
         public async Task<IActionResult> CreateMovieAsync([FromBody] CreateMovieRequest request, CancellationToken token)
         {
             var movie = request.ToMovie();
@@ -29,7 +31,8 @@ namespace Movies.Api.Controllers.V1
             return CreatedAtAction(nameof(Get), new { idOrSlug = movie.Id }, movie);
         }
 
-        [HttpGet(ApiEndpoints.V1.Movies.Get)]
+         
+        [HttpGet(ApiEndpoints.Default.Movies.Get)]
         public async Task<IActionResult> Get([FromRoute] string idOrSlug
             , LinkGenerator linkGenerator, CancellationToken token)
         {
@@ -71,7 +74,8 @@ namespace Movies.Api.Controllers.V1
             return Ok(response);
         }
 
-        [HttpGet(ApiEndpoints.V1.Movies.GetAll)]
+  
+        [HttpGet(ApiEndpoints.Default.Movies.GetAll)]
         public async Task<IActionResult> GetAll([FromQuery] GetAllMoviesRequest request, CancellationToken token)
         {
             var userId = HttpContext.GetUserId();
@@ -86,7 +90,7 @@ namespace Movies.Api.Controllers.V1
         }
 
         [Authorize(AuthConstants.TrustedMemberPolicyName)]
-        [HttpPut(ApiEndpoints.V1.Movies.Update)]
+        [HttpPut(ApiEndpoints.Default.Movies.Update)]
         public async Task<IActionResult> Update([FromRoute] Guid id,
             [FromBody] UpdateMovieRequest request, CancellationToken token)
         {
@@ -105,7 +109,7 @@ namespace Movies.Api.Controllers.V1
         }
 
         [Authorize(AuthConstants.TrustedMemberPolicyName)]
-        [HttpDelete(ApiEndpoints.V1.Movies.Delete)]
+        [HttpDelete(ApiEndpoints.Default.Movies.Delete)]
         public async Task<IActionResult> Delete([FromRoute] Guid id, CancellationToken token)
         {
             var isDeleted = await _movieService.DeleteByIdAsync(id, token);
