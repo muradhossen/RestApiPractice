@@ -127,7 +127,7 @@ namespace Movies.Api.Controllers.V1
             return Ok(movie);
         }
 
-        [Authorize(AuthConstants.TrustedMemberPolicyName)]
+        [Authorize(AuthConstants.AdminUserPolicyName)]
         [HttpDelete(ApiEndpoints.Default.Movies.Delete)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
