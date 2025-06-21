@@ -44,6 +44,11 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+//#region Api versioning
+
+//builder.Services.AddApiVersioning().AddMvc();
+//#endregion
+
 builder.Services.AddApplication()
     .AddDatabase(confg["Database:ConnectionString"]);
 

@@ -7,7 +7,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
 
-namespace Movies.Api.Controllers
+namespace Movies.Api.Controllers.V1
 {
     [ApiController]
     public class IdentityController : ControllerBase
