@@ -47,6 +47,7 @@ builder.Services.AddSwaggerGen();
 #region Api versioning
 
 builder.Services.AddApiVersioning().AddMvc();
+
 #endregion
 
 builder.Services.AddApplication()
