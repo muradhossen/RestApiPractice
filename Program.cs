@@ -12,7 +12,7 @@ using Swashbuckle.AspNetCore.SwaggerGen;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
- 
+
 var confg = builder.Configuration;
 
 builder.Services.AddAuthentication(x =>
@@ -36,12 +36,12 @@ builder.Services.AddAuthentication(x =>
 
 builder.Services.AddAuthorization(x =>
 {
-    x.AddPolicy(AuthConstants.AdminUserPolicyName, 
+    x.AddPolicy(AuthConstants.AdminUserPolicyName,
         p => p.RequireClaim(AuthConstants.AdminClaimName, "true"));
-    
+
     x.AddPolicy(AuthConstants.TrustedMemberPolicyName,
-        p => p.RequireAssertion(c => 
-            c.User.HasClaim(m => m is { Type: AuthConstants.AdminClaimName, Value: "true" }) || 
+        p => p.RequireAssertion(c =>
+            c.User.HasClaim(m => m is { Type: AuthConstants.AdminClaimName, Value: "true" }) ||
             c.User.HasClaim(m => m is { Type: AuthConstants.TrustedMemberClaimName, Value: "true" })));
 });
 
@@ -70,10 +70,22 @@ builder.Services.AddApplication()
 builder.Services.AddHealthChecks()
     .AddCheck<DatabaseHealthCheck>("Database");
 
-builder.Services.AddResponseCaching();
+//builder.Services.AddResponseCaching();
+builder.Services.AddOutputCache(x =>
+{
+    x.AddBasePolicy(c => c.Cache());
+    x.AddPolicy("MovieCache", c =>
+    {
+        c.Cache()
+        .Expire(TimeSpan.FromMinutes(1))
+        .SetVaryByQuery(["title, year", "sortBy", "page", "pageSize"])
+        .Tag("movies");
+    });
+
+});
 
 var app = builder.Build();
- 
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -94,7 +106,8 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.UseResponseCaching();
+//app.UseResponseCaching();
+app.UseOutputCache();
 
 app.UseMiddleware<ValidationMappingMiddleware>();
 

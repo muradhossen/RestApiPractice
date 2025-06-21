@@ -1,6 +1,7 @@
 ﻿using Asp.Versioning;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OutputCaching;
 using Movies.Api.Auth;
 using Movies.Api.Mapping;
 using Movies.Application.Models;
@@ -10,36 +11,41 @@ using Movies.Contracts.Responses;
 
 namespace Movies.Api.Controllers.V1
 {
-    [Authorize]
+    //[Authorize]
     [ApiController]
     [ApiVersion(1.0)]
-   
+
     public class MoviesController : ControllerBase
     {
         private readonly IMovieService _movieService;
+        private readonly IOutputCacheStore _outputCacheStore;
 
-        public MoviesController(IMovieService movieService)
+        public MoviesController(IMovieService movieService, IOutputCacheStore outputCacheStore)
         {
             _movieService = movieService;
+            _outputCacheStore = outputCacheStore;
         }
 
         [Authorize(AuthConstants.TrustedMemberPolicyName)]
         [HttpPost(ApiEndpoints.Default.Movies.Create)]
         [ProducesResponseType(typeof(MovieResponse), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(ValidationFailureResponse),StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ValidationFailureResponse), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> CreateMovieAsync([FromBody] CreateMovieRequest request, CancellationToken token)
         {
             var movie = request.ToMovie();
 
             var result = await _movieService.CreateMovieAsync(movie, token);
+            await _outputCacheStore.EvictByTagAsync("movies", token);
+
             return CreatedAtAction(nameof(Get), new { idOrSlug = movie.Id }, movie);
         }
 
-        
+
         [HttpGet(ApiEndpoints.Default.Movies.Get)]
         [ProducesResponseType(typeof(MovieResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ResponseCache(Duration = 60, Location = ResponseCacheLocation.Any,VaryByHeader = "Accept,Accept-Encoding")]
+        //[ResponseCache(Duration = 60, Location = ResponseCacheLocation.Any,VaryByHeader = "Accept,Accept-Encoding")]
+        [OutputCache(PolicyName = "MovieCache")]
         public async Task<IActionResult> Get([FromRoute] string idOrSlug
             , LinkGenerator linkGenerator, CancellationToken token)
         {
@@ -79,10 +85,11 @@ namespace Movies.Api.Controllers.V1
 
 
             return Ok(response);
-        } 
+        }
 
         [HttpGet(ApiEndpoints.Default.Movies.GetAll)]
         [ProducesResponseType(typeof(MovieResponse), StatusCodes.Status200OK)]
+        [OutputCache(PolicyName = "MovieCache")]
         public async Task<IActionResult> GetAll([FromQuery] GetAllMoviesRequest request, CancellationToken token)
         {
             var userId = HttpContext.GetUserId();
@@ -98,9 +105,9 @@ namespace Movies.Api.Controllers.V1
 
         [Authorize(AuthConstants.TrustedMemberPolicyName)]
         [HttpPut(ApiEndpoints.Default.Movies.Update)]
-        [ProducesResponseType(typeof(Movie),StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(Movie), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(typeof(ValidationFailureResponse),StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ValidationFailureResponse), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Update([FromRoute] Guid id,
             [FromBody] UpdateMovieRequest request, CancellationToken token)
         {
@@ -115,13 +122,14 @@ namespace Movies.Api.Controllers.V1
                 return NotFound();
             }
 
+            await _outputCacheStore.EvictByTagAsync("movies", token);
             return Ok(movie);
         }
 
         [Authorize(AuthConstants.TrustedMemberPolicyName)]
         [HttpDelete(ApiEndpoints.Default.Movies.Delete)]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)] 
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Delete([FromRoute] Guid id, CancellationToken token)
         {
             var isDeleted = await _movieService.DeleteByIdAsync(id, token);
@@ -131,6 +139,7 @@ namespace Movies.Api.Controllers.V1
                 return NotFound();
             }
 
+            await _outputCacheStore.EvictByTagAsync("movies", token);
             return Ok();
         }
     }
