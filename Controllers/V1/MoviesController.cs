@@ -30,6 +30,7 @@ namespace Movies.Api.Controllers.V1
         [HttpPost(ApiEndpoints.Default.Movies.Create)]
         [ProducesResponseType(typeof(MovieResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ValidationFailureResponse), StatusCodes.Status400BadRequest)]
+        [ServiceFilter(typeof(ApiKeyAuthFilter))]
         public async Task<IActionResult> CreateMovieAsync([FromBody] CreateMovieRequest request, CancellationToken token)
         {
             var movie = request.ToMovie();

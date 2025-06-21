@@ -60,6 +60,7 @@ builder.Services.AddApiVersioning(options =>
 builder.Services.AddControllers();
 
 builder.Services.AddTransient<IConfigureOptions<SwaggerGenOptions>, ConfigureSwaggerOption>();
+builder.Services.AddTransient<ApiKeyAuthFilter>();
 
 
 builder.Services.AddSwaggerGen(x => x.OperationFilter<SwaggerDefaultValues>());
