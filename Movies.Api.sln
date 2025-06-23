@@ -9,8 +9,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Movies.Application", "..\Mo
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Movies.Contracts", "..\Movies.Contracts\Movies.Contracts.csproj", "{6CE47F3C-50EE-4B54-A80F-31D00E4262B7}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SDK", "SDK", "{BCFEA1E5-B243-45A3-A39A-84242073979A}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Movies.Api.Sdk", "..\Movies.Api.Sdk\Movies.Api.Sdk.csproj", "{661A0402-3BD1-4566-98C3-28D490317F2F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Movies.Api.Sdk.Consumer", "..\Movies.Api.Sdk.Consumer\Movies.Api.Sdk.Consumer.csproj", "{07036230-D441-4B19-BF36-66D48B51C411}"
@@ -44,9 +42,5 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{661A0402-3BD1-4566-98C3-28D490317F2F} = {BCFEA1E5-B243-45A3-A39A-84242073979A}
-		{07036230-D441-4B19-BF36-66D48B51C411} = {BCFEA1E5-B243-45A3-A39A-84242073979A}
 	EndGlobalSection
 EndGlobal
